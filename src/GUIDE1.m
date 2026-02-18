@@ -22,7 +22,7 @@ function varargout = GUIDE1(varargin)
 
 % Edit the above text to modify the response to help GUIDE1
 
-% Last Modified by GUIDE v2.5 18-Feb-2026 13:58:16
+% Last Modified by GUIDE v2.5 18-Feb-2026 14:45:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,7 +60,7 @@ guidata(hObject, handles);
 
 % UIWAIT makes GUIDE1 wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
-handles.axes3.Toolbar.Visible = 'off';
+handles.axesJ13.Toolbar.Visible = 'off';
 
 
 % --- Outputs from this function are returned to the command line.
@@ -86,9 +86,6 @@ function axes1_CreateFcn(hObject, eventdata, handles)
 %   setBackgroundWindow(hObject);   -
 
 %%%% SUPPORT FUNCTIONS %%%%
-handles.axes1.Toolbar.Visible = 'off';
-
-
 %% CONFIGURACION DE FONDO DE PANTALLA
 % Recibe como parametro el objeto componente sobre el que se quieref
 % configurar
@@ -123,41 +120,41 @@ function setBackgroundWindow(hObject)
     uistack(hObject,'bottom');
 
 
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
+% --- Executes on button press in btnNuevoJuego.
+function btnNuevoJuego_Callback(hObject, eventdata, handles)
+% hObject    handle to btnNuevoJuego (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 fprintf("Has presionado el botón de 'JUEVO NUEVO'\n");
 
 
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
+% --- Executes on button press in btnSimulacion.
+function btnSimulacion_Callback(hObject, eventdata, handles)
+% hObject    handle to btnSimulacion (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 fprintf("Has presionado el botón de 'SIMULACIÓN'\n");
 
 
-% --- Executes on button press in pushbutton3.
-function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
+% --- Executes on button press in btnSalir.
+function btnSalir_Callback(hObject, eventdata, handles)
+% hObject    handle to btnSalir (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 fprintf("Has presionado el botón de 'SALIR'\n");
 
 
-% --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
+% --- Executes on button press in btnPedir.
+function btnPedir_Callback(hObject, eventdata, handles)
+% hObject    handle to btnPedir (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 fprintf("Has presionado el botón de 'PEDIR MÁS CARTAS'\n");
 
 
-% --- Executes on button press in pushbutton5.
-function pushbutton5_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton5 (see GCBO)
+% --- Executes on button press in btnPlantarse.
+function btnPlantarse_Callback(hObject, eventdata, handles)
+% hObject    handle to btnPlantarse (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 fprintf("Has presionado el botón de 'PLANTARSE'\n");
@@ -187,10 +184,20 @@ end
 
 
 % --- Executes during object creation, after setting all properties.
-function axes3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to axes3 (see GCBO)
+function axesJ13_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axesJ13 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-% Hint: place code in OpeningFcn to populate axes3
-handles.axes3.Toolbar.Visible = 'off';
+% Hint: place code in OpeningFcn to populate axesJ13
+handles.axesJ13.Toolbar.Visible = 'off';
+
+
+% --- Executes during object creation, after setting all properties.
+function axes4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes4
+
