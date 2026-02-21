@@ -1,4 +1,4 @@
-function varargout = GUIDE1(varargin)
+    function varargout = GUIDE1(varargin)
 % GUIDE1 MATLAB code for GUIDE1.fig
 %      GUIDE1, by itself, creates a new GUIDE1 or raises the existing
 %      singleton*.
@@ -142,21 +142,36 @@ function setBackgroundWindow(hObject)
 function btnNuevoJuego_Callback(hObject, eventdata, handles)
 fprintf("Has presionado el botón de 'JUEVO NUEVO'\n");
 
-% SE LIMPIAN LOS CONTENEDORES (PANELS)
-reiniciar_juego(handles);
+% SE LIMPIAN LOS CONTENEDORES Y SE RESETEAN LAS VARIABLES
+handles = reiniciar_juego(handles);
+guidata(hObject, handles);
 
 %SE HACE EL PROCESO DE CARGA DE BARAJA
+crear_variables_baraja();
 cargar_variables_baraja();
 
 % SE BARAJEA (handles se actualiza con Baraja_fig y Baraja_val barajeadas)
 handles = barajear(hObject, handles);
 
-handles
 % SE REPARTE 1 CARTA AL JUGADOR
-mostrar_figuras('Espadas/1_As_de_Espadas.png',1,'jugador',handles);
-%mostrar_figuras('Espadas/2_de_Espadas.png',2,'jugador',handles);
-%mostrar_figuras('Espadas/3_de_Espadas.png',1,'casa',handles);
-%mostrar_figuras('Espadas/4_de_Espadas.png',2,'casa',handles);
+% Tomar la primera carta de la baraja barajeada
+carta_fig = handles.Baraja_fig{handles.pos_carta_1};  % ruta relativa de la imagen
+carta_val = handles.Baraja_val(handles.pos_carta_1);  % valor numérico de la carta
+
+% Actualizar puntuación del jugador
+handles.P_J = handles.P_J + carta_val;
+guidata(hObject, handles);
+
+% Mostrar la carta en la posición visual 1 del jugador
+mostrar_figuras(carta_fig, handles.pos_ver_c, 'jugador', handles);
+
+% Avanzar contadores
+handles.pos_carta_1 = handles.pos_carta_1 + 1;  % siguiente carta del mazo
+handles.pos_ver_c   = handles.pos_ver_c   + 1;  % siguiente slot visual del jugador
+guidata(hObject, handles);
+
+fprintf("Carta repartida al jugador: %s  (valor: %.1f) | P_J total: %.1f\n", ...
+        carta_fig, carta_val, handles.P_J);
 
 % SE COMIENZA CON EL CLICLO REPARTIR - PEDIR/PLANTARSE
 
@@ -183,24 +198,42 @@ figure1_CloseRequestFcn(handles.figure1, eventdata, handles)
 % --- Executes on button press in btnPedir.
 function btnPedir_Callback(hObject, eventdata, handles)
 fprintf("Has presionado el botón de 'PEDIR MÁS CARTAS'\n");
+
+P_J       = handles.P_J;
 pos_ver_c = handles.pos_ver_c;
-P_J = handles.P_J;
 
-if(P_J <= 7.5 && pos_ver_c<=13)
-    fprintf("%i", pos_ver_c);
-    mostrar_figuras('Espadas/1_As_de_Espadas.png',pos_ver_c,'jugador',handles);
-    
-    pos_ver_c = pos_ver_c + 1;
-    handles.pos = pos_ver_c;
-    guidata(hObject, handles);
+% Solo se puede pedir si no se ha pasado y quedan slots visuales
+if (P_J <= 7.5 && pos_ver_c <= 12)
 
-    P_J = P_J + 1.5;
+    % --- Tomar siguiente carta del mazo ---
+    carta_fig = handles.Baraja_fig{handles.pos_carta_1};
+    carta_val = handles.Baraja_val(handles.pos_carta_1);
+
+    % --- Actualizar puntuación del jugador ---
+    P_J = P_J + carta_val;
     handles.P_J = P_J;
     guidata(hObject, handles);
+
+    % --- Mostrar la carta en el slot visual correspondiente ---
+    mostrar_figuras(carta_fig, pos_ver_c, 'jugador', handles);
+    fprintf("Carta pedida: %s  (valor: %.1f) | P_J total: %.1f\n", carta_fig, carta_val, P_J);
+
+    % --- Avanzar contadores ---
+    handles.pos_carta_1 = handles.pos_carta_1 + 1;
+    handles.pos_ver_c   = pos_ver_c + 1;
+    guidata(hObject, handles);
+
+    % --- Verificar si el jugador se pasó DESPUÉS de sumar ---
+    if P_J > 7.5
+        fprintf("¡El jugador se ha pasado! P_J = %.1f\n", P_J);
+        set(handles.PanelResultados, 'Visible', 'on');
+        set(handles.editResultados, 'String', sprintf('¡Te has pasado! (%.1f) Gana la Casa!!!', P_J));
+    end
+
 else
-    fprintf("Se ha pasado el jugador, ha perdido");
+    fprintf("No se puede pedir más cartas. P_J=%.1f pos=%d\n", P_J, pos_ver_c);
     set(handles.PanelResultados, 'Visible', 'on');
-    set(handles.editResultados, 'String', 'Te has pasado!!!, gana la Casa!!!');
+    set(handles.editResultados, 'String', '¡No puedes pedir más cartas!');
 end
 
 
@@ -208,17 +241,29 @@ end
 % --- Executes on button press in btnPlantarse.
 function btnPlantarse_Callback(hObject, eventdata, handles)
 fprintf("Has presionado el botón de 'PLANTARSE'\n");
-% AQUI SE GUARDAN O ACTUALIZAN LAS VARIABLES ACTUALE
 
-% SE "VOLTEA" la ultima carta del jugador (que se vea la parte trasera)
+% El jugador se planta: guardar puntuación final
+P_J = handles.P_J;
+fprintf("El jugador se planta con P_J = %.1f\n", P_J);
 
-% ESTE BOTON DESENCADENA EL EVENTO DE LA CASA
-fprintf("le toca jugar a la casa!!");
-
-% AQUI IRIA EL PROCESO DE LA CASA, LO QUE SE HIZO EN LAS PRACTICAS
+% Anunciar que le toca a la casa
 set(handles.PanelResultados, 'Visible', 'on');
-set(handles.editResultados, 'String', 'Turno de la casa');
-mostrar_figuras('Espadas/1_As_de_Espadas.png',1,'casa',handles);
+set(handles.editResultados, 'String', sprintf('Te plantaste con %.1f. Turno de la casa...', P_J));
+
+% --- TURNO DE LA CASA: repartir primera carta ---
+carta_fig_c = handles.Baraja_fig{handles.pos_carta_1};
+carta_val_c = handles.Baraja_val(handles.pos_carta_1);
+
+handles.P_C = handles.P_C + carta_val_c;
+guidata(hObject, handles);
+
+mostrar_figuras(carta_fig_c, 1, 'casa', handles);
+fprintf("Casa recibe carta: %s (valor: %.1f) | P_C = %.1f\n", carta_fig_c, carta_val_c, handles.P_C);
+
+handles.pos_carta_1 = handles.pos_carta_1 + 1;
+guidata(hObject, handles);
+
+% AQUI IRÍA EL BUCLE COMPLETO DE LA CASA (práctica anterior)
 
 function editResultados_Callback(hObject, eventdata, handles)
 

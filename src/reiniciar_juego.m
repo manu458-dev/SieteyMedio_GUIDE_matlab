@@ -1,5 +1,12 @@
-function reiniciar_juego(handles)
-fprintf("Evento: reiniciando juego");
+function handles = reiniciar_juego(handles)
+fprintf("Evento: reiniciando juego\n");
+
+%% RESETEAR VARIABLES DE ESTADO EN HANDLES
+handles.P_J         = 0.0;  % puntuación del jugador
+handles.P_C         = 0.0;  % puntuación de la casa
+handles.pos_carta_1 = 1;    % puntero al mazo (primera carta)
+handles.pos_ver_c   = 1;    % slot visual del jugador (empieza en 1)
+handles.i           = 1;
 
 %% SE OCULTAN LOS CONTENEDORES DE LAS CARTAS DEL JUGADOR
 set(handles.PanelJ1,'Visible','off');
@@ -35,5 +42,5 @@ set(handles.PanelC13,'Visible','off');
 set(handles.btnPlantarse,'Visible','on');
 set(handles.btnPedir,'Visible','on');
 
-%% SE OCULTA EL PANEL DE RESULTADOS (el que muestra el mensaje "gano casa" o "gano jugador")
+%% SE OCULTA EL PANEL DE RESULTADOS
 set(handles.PanelResultados,'Visible','off');
