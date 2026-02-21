@@ -58,6 +58,10 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
+%CONFIGURACIÓN DE VARIALES GLOBALES PERSONALIZADAS
+handles.pos = 1;
+guidata(hObject, handles);
+
 % UIWAIT makes GUIDE1 wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 handles.axesJ13.Toolbar.Visible = 'off';
@@ -131,8 +135,13 @@ reiniciar_juego(handles);
 cargar_variables_baraja();
 
 % SE BARAJEA
+barajear();
 
 % SE REPARTE 1 CARTA AL JUGADOR
+mostrar_figuras('Espadas/1_As_de_Espadas.png',1,'jugador',handles);
+%mostrar_figuras('Espadas/2_de_Espadas.png',2,'jugador',handles);
+%mostrar_figuras('Espadas/3_de_Espadas.png',1,'casa',handles);
+%mostrar_figuras('Espadas/4_de_Espadas.png',2,'casa',handles);
 
 % SE COMIENZA CON EL CLICLO REPARTIR - PEDIR/PLANTARSE
 
@@ -158,16 +167,25 @@ figure1_CloseRequestFcn(handles.figure1, eventdata, handles)
 
 % --- Executes on button press in btnPedir.
 function btnPedir_Callback(hObject, eventdata, handles)
-
 fprintf("Has presionado el botón de 'PEDIR MÁS CARTAS'\n");
+pos = handles.pos;
+
+if(pos<=13)
+    fprintf("%i", pos);
+    mostrar_figuras('Espadas/1_As_de_Espadas.png',pos,'jugador',handles);
+    
+    pos = pos + 1;
+    handles.pos = pos;
+    guidata(hObject, handles);
+end
+
 
 
 % --- Executes on button press in btnPlantarse.
 function btnPlantarse_Callback(hObject, eventdata, handles)
-
 fprintf("Has presionado el botón de 'PLANTARSE'\n");
 
-
+% ESTE BOTON DESENCADENA EL EVENTO DE LA CASA
 
 function edit2_Callback(hObject, eventdata, handles)
 

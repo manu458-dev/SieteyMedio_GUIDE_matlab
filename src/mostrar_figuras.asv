@@ -1,0 +1,43 @@
+function mostrar_figuras(carta_a_mostrar,pos, usuario, handles)
+fprintf("carta a mostrar es: %s",carta_a_mostrar);
+fprintf("carta a mostrar es: %i",pos);
+fprintf("carta a mostrar es: %",carta_a_mostrar);
+fprintf("carta a mostrar es: %s",carta_a_mostrar);
+
+pathname = 'D:\uam\trimestre 2\Inteligencia Computacional\semana4\SieteyMedio_GUIDE_matlab\assets\images\Mazos_de_cartas\Parte_Trasera\';
+
+% VERIFICACIÓN DE QUE TURNO ES:
+% Si es jugador
+if(strcmp(usuario, 'jugador'))
+    switch pos
+        % EN ESTA SECCIÓN, ESTAN LOS PANELES DEL JUGADOR
+        case 1
+            set(handles.PanelJ1,)
+        case 2
+
+        case 3
+
+        case 4
+
+        case 5
+
+        case 6
+
+        case 7
+
+        case 8
+
+        case 9
+
+        case 10
+
+        case 11
+
+        case 12
+    end
+
+% Si es la casa   
+else
+
+end
+
