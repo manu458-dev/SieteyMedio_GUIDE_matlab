@@ -22,7 +22,7 @@ function varargout = GUIDE1(varargin)
 
 % Edit the above text to modify the response to help GUIDE1
 
-% Last Modified by GUIDE v2.5 20-Feb-2026 23:52:14
+% Last Modified by GUIDE v2.5 21-Feb-2026 12:53:53
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,9 +59,23 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 %CONFIGURACIÓN DE VARIALES GLOBALES PERSONALIZADAS
-handles.pos = 1;
+handles.P_J = 0.0; % PUNTUACIÓN TOTAL DEL JUGADOR
 guidata(hObject, handles);
 
+handles.P_C = 0.0; % PUNTUACIÓN TOTAL DE LA CASA
+guidata(hObject, handles);
+
+handles.pos_carta_1 = 1; % USAR con VARIABLES Baraja_figura y Bajara_valor
+guidata(hObject, handles);
+
+handles.total_cartas = 40; % auxiliar para el calculo de probabilidades
+guidata(hObject, handles);
+
+handles.pos_ver_c = 1; % contador para desplegar los paneles del jugador y carta
+guidata(hObject, handles);
+
+handles.i = 1;
+guidata(hObject, handles);
 % UIWAIT makes GUIDE1 wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 handles.axesJ13.Toolbar.Visible = 'off';
@@ -134,9 +148,10 @@ reiniciar_juego(handles);
 %SE HACE EL PROCESO DE CARGA DE BARAJA
 cargar_variables_baraja();
 
-% SE BARAJEA
-barajear();
+% SE BARAJEA (handles se actualiza con Baraja_fig y Baraja_val barajeadas)
+handles = barajear(hObject, handles);
 
+handles
 % SE REPARTE 1 CARTA AL JUGADOR
 mostrar_figuras('Espadas/1_As_de_Espadas.png',1,'jugador',handles);
 %mostrar_figuras('Espadas/2_de_Espadas.png',2,'jugador',handles);
@@ -168,15 +183,24 @@ figure1_CloseRequestFcn(handles.figure1, eventdata, handles)
 % --- Executes on button press in btnPedir.
 function btnPedir_Callback(hObject, eventdata, handles)
 fprintf("Has presionado el botón de 'PEDIR MÁS CARTAS'\n");
-pos = handles.pos;
+pos_ver_c = handles.pos_ver_c;
+P_J = handles.P_J;
 
-if(pos<=13)
-    fprintf("%i", pos);
-    mostrar_figuras('Espadas/1_As_de_Espadas.png',pos,'jugador',handles);
+if(P_J <= 7.5 && pos_ver_c<=13)
+    fprintf("%i", pos_ver_c);
+    mostrar_figuras('Espadas/1_As_de_Espadas.png',pos_ver_c,'jugador',handles);
     
-    pos = pos + 1;
-    handles.pos = pos;
+    pos_ver_c = pos_ver_c + 1;
+    handles.pos = pos_ver_c;
     guidata(hObject, handles);
+
+    P_J = P_J + 1.5;
+    handles.P_J = P_J;
+    guidata(hObject, handles);
+else
+    fprintf("Se ha pasado el jugador, ha perdido");
+    set(handles.PanelResultados, 'Visible', 'on');
+    set(handles.editResultados, 'String', 'Te has pasado!!!, gana la Casa!!!');
 end
 
 
@@ -184,15 +208,24 @@ end
 % --- Executes on button press in btnPlantarse.
 function btnPlantarse_Callback(hObject, eventdata, handles)
 fprintf("Has presionado el botón de 'PLANTARSE'\n");
+% AQUI SE GUARDAN O ACTUALIZAN LAS VARIABLES ACTUALE
+
+% SE "VOLTEA" la ultima carta del jugador (que se vea la parte trasera)
 
 % ESTE BOTON DESENCADENA EL EVENTO DE LA CASA
+fprintf("le toca jugar a la casa!!");
 
-function edit2_Callback(hObject, eventdata, handles)
+% AQUI IRIA EL PROCESO DE LA CASA, LO QUE SE HIZO EN LAS PRACTICAS
+set(handles.PanelResultados, 'Visible', 'on');
+set(handles.editResultados, 'String', 'Turno de la casa');
+mostrar_figuras('Espadas/1_As_de_Espadas.png',1,'casa',handles);
+
+function editResultados_Callback(hObject, eventdata, handles)
 
 
 
 % --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
+function editResultados_CreateFcn(hObject, eventdata, handles)
 
 
 % Hint: edit controls usually have a white background on Windows.

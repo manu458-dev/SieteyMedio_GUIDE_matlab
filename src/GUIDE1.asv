@@ -22,7 +22,7 @@ function varargout = GUIDE1(varargin)
 
 % Edit the above text to modify the response to help GUIDE1
 
-% Last Modified by GUIDE v2.5 18-Feb-2026 14:45:20
+% Last Modified by GUIDE v2.5 20-Feb-2026 23:52:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -56,6 +56,16 @@ function GUIDE1_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 
 % Update handles structure
+guidata(hObject, handles);
+
+%CONFIGURACIÓN DE VARIALES GLOBALES PERSONALIZADAS
+handles.pos = 1;
+guidata(hObject, handles);
+
+handles.P_J = 0.0;
+guidata(hObject, handles);
+
+handles.P_C = 0.0;
 guidata(hObject, handles);
 
 % UIWAIT makes GUIDE1 wait for user response (see UIRESUME)
@@ -123,17 +133,28 @@ function setBackgroundWindow(hObject)
 % --- Executes on button press in btnNuevoJuego.
 function btnNuevoJuego_Callback(hObject, eventdata, handles)
 fprintf("Has presionado el botón de 'JUEVO NUEVO'\n");
+
+% SE LIMPIAN LOS CONTENEDORES (PANELS)
 reiniciar_juego(handles);
 
 %SE HACE EL PROCESO DE CARGA DE BARAJA
+cargar_variables_baraja();
 
 % SE BARAJEA
+barajear();
 
 % SE REPARTE 1 CARTA AL JUGADOR
+mostrar_figuras('Espadas/1_As_de_Espadas.png',1,'jugador',handles);
+%mostrar_figuras('Espadas/2_de_Espadas.png',2,'jugador',handles);
+%mostrar_figuras('Espadas/3_de_Espadas.png',1,'casa',handles);
+%mostrar_figuras('Espadas/4_de_Espadas.png',2,'casa',handles);
 
 % SE COMIENZA CON EL CLICLO REPARTIR - PEDIR/PLANTARSE
 
-% SE PAAS
+% SE PASA EL TURNO A LA MAQUINA
+    % Aqui se implementa lo que se hizo en la práctica anterior
+
+% SE EVAUAL LOS RESULTADOS (ver ganador)
 
 
 
@@ -146,22 +167,35 @@ fprintf("Has presionado el botón de 'SIMULACIÓN'\n");
 
 % --- Executes on button press in btnSalir.
 function btnSalir_Callback(hObject, eventdata, handles)
-
 fprintf("Has presionado el botón de 'SALIR'\n");
+figure1_CloseRequestFcn(handles.figure1, eventdata, handles)
 
 
 % --- Executes on button press in btnPedir.
 function btnPedir_Callback(hObject, eventdata, handles)
-
 fprintf("Has presionado el botón de 'PEDIR MÁS CARTAS'\n");
+pos = handles.pos;
+P_J = handles.P_J;
+
+if(P_J <= 7.5 && pos<=13)
+    fprintf("%i", pos);
+    mostrar_figuras('Espadas/1_As_de_Espadas.png',pos,'jugador',handles);
+    
+    pos = pos + 1;
+    handles.pos = pos;
+    guidata(hObject, handles);
+else
+    print("Se ha pasado el jugador, ha perdido");
+
+end
+
 
 
 % --- Executes on button press in btnPlantarse.
 function btnPlantarse_Callback(hObject, eventdata, handles)
-
 fprintf("Has presionado el botón de 'PLANTARSE'\n");
 
-
+% ESTE BOTON DESENCADENA EL EVENTO DE LA CASA
 
 function edit2_Callback(hObject, eventdata, handles)
 
@@ -186,3 +220,14 @@ handles.axesJ13.Toolbar.Visible = 'off';
 % --- Executes during object creation, after setting all properties.
 function axes4_CreateFcn(hObject, eventdata, handles)
 
+
+
+% --- Executes when user attempts to close figure1.
+function figure1_CloseRequestFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: delete(hObject) closes the figure
+delete(hObject);
+fprintf("Se ha cerrado la ventana con éxito\n");
