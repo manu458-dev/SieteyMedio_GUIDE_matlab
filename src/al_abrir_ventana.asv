@@ -1,0 +1,38 @@
+function al_abrir_ventana(handles)
+%% SE ESTABLECE LA RUTA EN LA QUE ESTAN LAS IMAGENES
+pathname = 'D:\uam\trimestre 2\Inteligencia Computacional\semana4\SieteyMedio_GUIDE_matlab\assets\images\Mazos_de_cartas\Parte_Trasera\';
+imagename = "Parte_Trasera"; 
+
+ax = [
+    handles.axesJ1,
+    handles.axesJ2,
+    handles.axesJ3,
+    handles.axesJ4,
+    handles.axesJ5,
+    handles.axesJ6,
+    handles.axesJ7,
+    handles.axesJ8,
+    handles.axesJ9,
+    handles.axesJ10,
+    handles.axesJ11,
+    handles.axesJ12,
+    handles.axesJ13,
+    handles.axesC1,
+    handles.axesJ2,
+    handles.axesJ3,
+    handles.axesJ4,
+    handles.axesJ5,
+    handles.axesJ6,
+    handles.axesJ7,
+    handles.axesJ8,
+    handles.axesJ9,
+    handles.axesJ10,
+    handles.axesJ11,
+    handles.axesJ12,
+    handles.axesJ13,
+];
+
+img = imread([pathname, char(imagename), '.jpeg']);
+axes(handles.axesJ1);
+image(img)
+axis off;

@@ -10,3 +10,9 @@
 * Se han colocado nombres a los identificadores de los componentes (TAGS), se puede visualizar en la siguiente imagen:
 
 ![Imagen](repo/TAGS.jpg)
+
+
+## Diagrama de flujos
+
+Para el commit del 21 de febrero 12:20, se ha implementado hasta la parte 3 del diagrama de flujos para la primera parte del programa (correspondiente al jugador)
+![Diagrama_flujos_1](repo/flujo_programa_parte_1.png)

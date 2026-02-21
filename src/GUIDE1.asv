@@ -22,7 +22,7 @@ function varargout = GUIDE1(varargin)
 
 % Edit the above text to modify the response to help GUIDE1
 
-% Last Modified by GUIDE v2.5 20-Feb-2026 23:52:14
+% Last Modified by GUIDE v2.5 18-Feb-2026 14:45:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -123,12 +123,9 @@ function setBackgroundWindow(hObject)
 % --- Executes on button press in btnNuevoJuego.
 function btnNuevoJuego_Callback(hObject, eventdata, handles)
 fprintf("Has presionado el botón de 'JUEVO NUEVO'\n");
-
-% SE LIMPIAN LOS CONTENEDORES (PANELS)
 reiniciar_juego(handles);
 
 %SE HACE EL PROCESO DE CARGA DE BARAJA
-cargar_variables_baraja();
 
 % SE BARAJEA
 
@@ -136,10 +133,7 @@ cargar_variables_baraja();
 
 % SE COMIENZA CON EL CLICLO REPARTIR - PEDIR/PLANTARSE
 
-% SE PASA EL TURNO A LA MAQUINA
-    % Aqui se implementa lo que se hizo en la práctica anterior
-
-% SE EVAUAL LOS RESULTADOS (ver ganador)
+% SE PAAS
 
 
 
@@ -152,8 +146,8 @@ fprintf("Has presionado el botón de 'SIMULACIÓN'\n");
 
 % --- Executes on button press in btnSalir.
 function btnSalir_Callback(hObject, eventdata, handles)
+
 fprintf("Has presionado el botón de 'SALIR'\n");
-figure1_CloseRequestFcn(handles.figure1, eventdata, handles)
 
 
 % --- Executes on button press in btnPedir.
@@ -192,14 +186,3 @@ handles.axesJ13.Toolbar.Visible = 'off';
 % --- Executes during object creation, after setting all properties.
 function axes4_CreateFcn(hObject, eventdata, handles)
 
-
-
-% --- Executes when user attempts to close figure1.
-function figure1_CloseRequestFcn(hObject, eventdata, handles)
-% hObject    handle to figure1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: delete(hObject) closes the figure
-delete(hObject);
-fprintf("Se ha cerrado la ventana con éxito\n");
