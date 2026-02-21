@@ -242,11 +242,9 @@ end
 function btnPlantarse_Callback(hObject, eventdata, handles)
 fprintf("Has presionado el botón de 'PLANTARSE'\n");
 
-% El jugador se planta: guardar puntuación final
+% El jugador se planta: mostrar mensaje provisional
 P_J = handles.P_J;
-fprintf("El jugador se planta con P_J = %.1f\n", P_J);
-
-% Anunciar que le toca a la casa
+fprintf("El jugador se planta con P_J = %.2f\n", P_J);
 set(handles.PanelResultados, 'Visible', 'on');
 set(handles.editResultados, 'String', sprintf('Te plantaste con %.1f. Turno de la casa...', P_J));
 
@@ -254,17 +252,22 @@ set(handles.editResultados, 'String', sprintf('Te plantaste con %.1f. Turno de l
 carta_fig_c = handles.Baraja_fig{handles.pos_carta_1};
 carta_val_c = handles.Baraja_val(handles.pos_carta_1);
 
-handles.P_C = handles.P_C + carta_val_c;
-guidata(hObject, handles);
-
-mostrar_figuras(carta_fig_c, 1, 'casa', handles);
-fprintf("Casa recibe carta: %s (valor: %.1f) | P_C = %.1f\n", carta_fig_c, carta_val_c, handles.P_C);
-
+handles.P_C         = handles.P_C + carta_val_c;
 handles.pos_carta_1 = handles.pos_carta_1 + 1;
 guidata(hObject, handles);
 
-% AQUI IRÍA EL BUCLE COMPLETO DE LA CASA (práctica anterior)
+mostrar_figuras(carta_fig_c, 1, 'casa', handles);
+fprintf("Casa recibe 1a carta: %s (valor: %.1f) | P_C = %.2f\n", carta_fig_c, carta_val_c, handles.P_C);
 
+% Verificar si la primera carta ya pasa de 7.5 (muy raro pero posible)
+if handles.P_C > 7.5
+    set(handles.editResultados, 'String', ...
+        sprintf('¡Ganaste! La casa se pasó en su primera carta (%.1f vs tu %.1f)', handles.P_C, P_J));
+    return;
+end
+
+% --- BUCLE COMPLETO DE LA CASA (decisión probabilística) ---
+handles = juega_casa(hObject, handles);
 function editResultados_Callback(hObject, eventdata, handles)
 
 
