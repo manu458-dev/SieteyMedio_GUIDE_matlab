@@ -1,6 +1,7 @@
 function al_abrir_ventana(handles)
-    % Ruta y nombre
-    pathname  = 'D:\uam\trimestre 2\Inteligencia Computacional\semana4\SieteyMedio_GUIDE_matlab\assets\images\Mazos_de_cartas\Parte_Trasera\';
+    % Ruta relativa desde la ubicación de este fichero
+    baseDir   = fileparts(mfilename('fullpath'));
+    pathname  = fullfile(baseDir, '..', 'assets', 'images', 'Mazos_de_cartas', 'Parte_Trasera');
     imagename = "Parte_Trasera";
 
     % Lista de axes
