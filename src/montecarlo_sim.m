@@ -71,6 +71,7 @@ end
 
 
 % TURNO DEL JUGADOR
+% TURNO DEL JUGADOR
 function [cartas_J, P_J, baraja, se_paso] = turno_jugador_auto(baraja, estrategia)
     cartas_J = [];
     P_J = [];
@@ -80,8 +81,6 @@ function [cartas_J, P_J, baraja, se_paso] = turno_jugador_auto(baraja, estrategi
     switch estrategia
         case 'probabilidad'
             % --- Estrategia probabilistica ---
-            % Calcula la probabilidad de pasarse (Pp) con las cartas
-            % que quedan en el mazo. Si Pp >= 0.5, se planta.
             while true
                 [carta, baraja] = sacar_carta_sim(baraja);
                 cartas_J(indice, :) = carta;
@@ -97,7 +96,6 @@ function [cartas_J, P_J, baraja, se_paso] = turno_jugador_auto(baraja, estrategi
                 end
 
                 % Calcular prob de pasarse si pide otra carta
-                % usando las cartas que quedan en el mazo
                 cartas_pasan = (baraja(:, 2) + puntos_J) > 7.5;
                 Pp = sum(cartas_pasan) / size(baraja, 1);
 
@@ -107,35 +105,56 @@ function [cartas_J, P_J, baraja, se_paso] = turno_jugador_auto(baraja, estrategi
                 end
             end
 
-        case {'conservadora', 'moderada', 'arriesgada'}
-            % --- Estrategias por umbral fijo ---
-            switch estrategia
-                case 'conservadora'
-                    umbral = 4;   % Se planta con 4 o mas -> juega seguro
-                case 'moderada'
-                    umbral = 5;   % Se planta con 5 o mas -> equilibrado
-                case 'arriesgada'
-                    umbral = 6;   % Se planta con 6 o mas -> arriesgado
+        case 'valor_objetivo'
+            % --- Estrategia por valor objetivo (5.5) ---
+            umbral = 5.5; 
+            
+            while true
+                [carta, baraja] = sacar_carta_sim(baraja);
+                cartas_J(indice, :) = carta;
+                P_J(indice) = carta(2);
+                indice = indice + 1;
+                
+                puntos_J = sum(P_J);
+
+                if puntos_J > 7.5
+                    se_paso = true;
+                    return;
+                end
+
+                % Función f1(mp): Si el puntaje es > 5.5, se planta (P)
+                if puntos_J > umbral
+                    return;
+                end
             end
+            
+        case 'valor_objetivo_aleatorio'
+            % --- Estrategia por valor objetivo aleatorio ---
+            % Posibles umbrales en Siete y Medio excluyendo el 5.5
+            umbrales_posibles = [1:0.5:5, 6:0.5:7]; 
+            umbral = umbrales_posibles(randi(length(umbrales_posibles)));
 
             while true
                 [carta, baraja] = sacar_carta_sim(baraja);
                 cartas_J(indice, :) = carta;
                 P_J(indice) = carta(2);
                 indice = indice + 1;
+                
+                puntos_J = sum(P_J);
 
-                if sum(P_J) > 7.5
+                if puntos_J > 7.5
                     se_paso = true;
                     return;
                 end
 
-                if sum(P_J) >= umbral
+                if puntos_J > umbral
                     return;
                 end
             end
 
         otherwise
-            [cartas_J, P_J, baraja, se_paso] = turno_jugador_auto(baraja, 'moderada');
+            % Default en caso de error tipográfico al llamar la función
+            [cartas_J, P_J, baraja, se_paso] = turno_jugador_auto(baraja, 'valor_objetivo');
     end
 end
 
@@ -149,7 +168,7 @@ function [puntos_casa, se_paso] = turno_casa_auto(baraja_original, baraja, carta
     if length(P_J) > 1
         puntos_visibles_J = sum(P_J(1:end-1));
     else
-        puntos_visibles_J = 0;  % solo 1 carta -> toda oculta
+        puntos_visibles_J = 0;  
     end
 
     cartas_C = [];
@@ -158,7 +177,6 @@ function [puntos_casa, se_paso] = turno_casa_auto(baraja_original, baraja, carta
 
     switch estrategia
         case 'probabilidad'
-            % Saca cartas y calcula probabilidades
             while true
                 [carta, baraja] = sacar_carta_sim(baraja);
                 cartas_C(indice, :) = carta;
@@ -166,28 +184,21 @@ function [puntos_casa, se_paso] = turno_casa_auto(baraja_original, baraja, carta
                 puntos_casa = sum(P_C);
                 indice = indice + 1;
 
-                % jugador gana
                 if puntos_casa > 7.5
                     se_paso = true;
                     return;
                 end
 
-                % Calcular Pg y Pp con Bayes
                 [Pg, Pp] = calcular_prob_sim(baraja_original, cartas_J, cartas_C, puntos_visibles_J, puntos_casa);
 
-                % plantarse o seguir pidiendo
                 if debe_plantarse_sim(Pg, Pp)
                     return;
                 end
             end
 
-        case {'conservadora', 'arriesgada'}
-            if strcmp(estrategia, 'conservadora')
-                umbral = 4;   % Se planta con 4 o mas
-            else
-                umbral = 6;   % Se planta con 6 o mas
-            end
-
+        case 'valor_objetivo'
+            umbral = 5.5;
+            
             while true
                 [carta, baraja] = sacar_carta_sim(baraja);
                 cartas_C(indice, :) = carta;
@@ -200,14 +211,35 @@ function [puntos_casa, se_paso] = turno_casa_auto(baraja_original, baraja, carta
                     return;
                 end
 
-                if puntos_casa >= umbral
+                % Función f1(mp) para la casa
+                if puntos_casa > umbral
+                    return;
+                end
+            end
+            
+        case 'valor_objetivo_aleatorio'
+            umbrales_posibles = [1:0.5:7]; % Excluye 5.5
+            umbral = umbrales_posibles(randi(length(umbrales_posibles)));
+            
+            while true
+                [carta, baraja] = sacar_carta_sim(baraja);
+                cartas_C(indice, :) = carta;
+                P_C(indice) = carta(2);
+                puntos_casa = sum(P_C);
+                indice = indice + 1;
+
+                if puntos_casa > 7.5
+                    se_paso = true;
+                    return;
+                end
+
+                if puntos_casa > umbral
                     return;
                 end
             end
 
         otherwise
-            % Default: probabilidad
-            [puntos_casa, se_paso] = turno_casa_auto(baraja_original, baraja, cartas_J, P_J, 'probabilidad');
+            [puntos_casa, se_paso] = turno_casa_auto(baraja_original, baraja, cartas_J, P_J, 'valor_objetivo');
     end
 end
 
