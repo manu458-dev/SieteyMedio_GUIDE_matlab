@@ -47,6 +47,13 @@ function handles = juega_casa(hObject, handles)
             pos_ver_c_casa = pos_ver_c_casa + 1;
         end
 
+        % CAMBIO JJ: PAUSA POR CADA CARTA EXTRA
+        % ==========================================================
+        drawnow;    % Refresca la interfaz visual
+        pause(1.0); % Pausa de 1 segundo entre cada carta nueva
+        % ==========================================================
+        % FIN DE CAMBIO
+
         fprintf("Casa recibe carta: %s (valor: %.1f) | P_C total: %.2f\n", ...
                 carta_fig, carta_val, handles.P_C);
 

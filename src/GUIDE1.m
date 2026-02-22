@@ -146,6 +146,10 @@ function setBackgroundWindow(hObject)
 function btnNuevoJuego_Callback(hObject, eventdata, handles)
 fprintf("Has presionado el botón de 'JUEVO NUEVO'\n");
 
+% correccion JJ de bug (boton plantarse)
+set(handles.btnPedir, 'Enable', 'on');
+set(handles.btnPlantarse, 'Enable', 'on');
+
 % SE LIMPIAN LOS CONTENEDORES Y SE RESETEAN LAS VARIABLES
 handles = reiniciar_juego(handles);
 guidata(hObject, handles);
@@ -167,12 +171,24 @@ handles.P_J = handles.P_J + carta_val;
 handles.cartas_J_val = [handles.cartas_J_val, carta_val];
 guidata(hObject, handles);
 
+% INICIO DE CORRECCIÓN (JJ): Mostrar la puntuacion inicial
+% ==========================================================
+% 1. Hacemos visible el panel
+set(handles.PanelResultados, 'Visible', 'on');
+
+% 2. Escribimos la puntuación inicial en el recuadro rojo
+set(handles.editResultados, 'String', sprintf('%.1f', handles.P_J));
+% ==========================================================
+% FIN DE CORRECCIÓN
+
 % Mostrar la carta en la posición visual 1 del jugador
 mostrar_figuras(carta_fig, handles.pos_ver_c, 'jugador', handles);
 
 %  Avanzar contadores 
 handles.pos_carta_1 = handles.pos_carta_1 + 1;  % siguiente carta del mazo
 handles.pos_ver_c   = handles.pos_ver_c   + 1;  % siguiente slot visual del jugador
+
+%(JJ) Es CRUCIAL guardar los cambios en handles después de actualizar P_J y editResultados
 guidata(hObject, handles);
 
 fprintf("Carta repartida al jugador: %s  (valor: %.1f) | P_J total: %.1f\n", ...
@@ -225,6 +241,10 @@ if (P_J <= 7.5 && pos_ver_c <= 12)
     mostrar_figuras(carta_fig, pos_ver_c, 'jugador', handles);
     fprintf("Carta pedida: %s  (valor: %.1f) | P_J total: %.1f\n", carta_fig, carta_val, P_J);
 
+    %
+    set(handles.PanelResultados,'Visible','on');
+        set(handles.editResultados,'String',P_J);
+
     %  Avanzar contadores 
     handles.pos_carta_1 = handles.pos_carta_1 + 1;
     handles.pos_ver_c   = pos_ver_c + 1;
@@ -235,6 +255,11 @@ if (P_J <= 7.5 && pos_ver_c <= 12)
         fprintf("¡El jugador se ha pasado! P_J = %.1f\n", P_J);
         set(handles.PanelResultados, 'Visible', 'on');
         set(handles.editResultados, 'String', sprintf('¡Te has pasado! (%.1f) Gana la Casa!!!', P_J));
+
+        % --- Correccion JJ de bug (boton plantarse):  ---
+        set(handles.btnPedir, 'Enable', 'off');
+        set(handles.btnPlantarse, 'Enable', 'off');
+        % ---------------------------
     end
 
 else
@@ -249,6 +274,16 @@ end
 function btnPlantarse_Callback(hObject, eventdata, handles)
 fprintf("Has presionado el botón de 'PLANTARSE'\n");
 
+% correccion JJ de bug (boton plantarse):
+% --- VALIDACIÓN DE SEGURIDAD ---
+if handles.P_J > 7.5 || handles.P_J == 0
+    return; % No hace nada si ya perdió o no tiene cartas
+end
+% Desactivar botones para que no se presione nada mientras la casa juega
+set(handles.btnPedir, 'Enable', 'off');
+set(handles.btnPlantarse, 'Enable', 'off');
+% -------------------------------
+
 % El jugador se planta: mostrar mensaje provisional
 P_J = handles.P_J;
 fprintf("El jugador se planta con P_J = %.2f\n", P_J);
@@ -258,12 +293,20 @@ set(handles.editResultados, 'String', sprintf('Te plantaste con %.1f. Turno de l
 % TURNO DE LA CASA 
 carta_fig_c = handles.Baraja_fig{handles.pos_carta_1};
 carta_val_c = handles.Baraja_val(handles.pos_carta_1);
-
 handles.P_C         = handles.P_C + carta_val_c;
 handles.pos_carta_1 = handles.pos_carta_1 + 1;
 guidata(hObject, handles);
 
+% --- MUESTRA LA PRIMERA CARTA ---
 mostrar_figuras(carta_fig_c, 1, 'casa', handles);
+
+% CAMBIO JJ (juego de la casa): pausas para las cartas de la casa
+% ==========================================================
+drawnow;      % Obliga a MATLAB a dibujar la carta antes de seguir
+pause(0.8);   % Espera 0.8 segundos (puedes ajustar el tiempo)
+% ==========================================================
+% FIN DE CAMBIO
+
 fprintf("Casa recibe 1a carta: %s (valor: %.1f) | P_C = %.2f\n", carta_fig_c, carta_val_c, handles.P_C);
 
 % Verificar si la primera carta ya pasa de 7.5 (muy raro pero posible)
