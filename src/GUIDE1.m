@@ -1,4 +1,4 @@
-    function varargout = GUIDE1(varargin)
+function varargout = GUIDE1(varargin)
 % GUIDE1 MATLAB code for GUIDE1.fig
 %      GUIDE1, by itself, creates a new GUIDE1 or raises the existing
 %      singleton*.
@@ -25,6 +25,7 @@
 % Last Modified by GUIDE v2.5 21-Feb-2026 12:53:53
 
 % Begin initialization code - DO NOT EDIT
+
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
@@ -66,6 +67,9 @@ handles.P_C = 0.0; % PUNTUACIÓN TOTAL DE LA CASA
 guidata(hObject, handles);
 
 handles.pos_carta_1 = 1; % USAR con VARIABLES Baraja_figura y Bajara_valor
+guidata(hObject, handles);
+
+handles.cartas_J_val = []; % valores individuales de las cartas del jugador
 guidata(hObject, handles);
 
 handles.total_cartas = 40; % auxiliar para el calculo de probabilidades
@@ -160,12 +164,13 @@ carta_val = handles.Baraja_val(handles.pos_carta_1);  % valor numérico de la ca
 
 % Actualizar puntuación del jugador
 handles.P_J = handles.P_J + carta_val;
+handles.cartas_J_val = [handles.cartas_J_val, carta_val];
 guidata(hObject, handles);
 
 % Mostrar la carta en la posición visual 1 del jugador
 mostrar_figuras(carta_fig, handles.pos_ver_c, 'jugador', handles);
 
-% Avanzar contadores
+%  Avanzar contadores 
 handles.pos_carta_1 = handles.pos_carta_1 + 1;  % siguiente carta del mazo
 handles.pos_ver_c   = handles.pos_ver_c   + 1;  % siguiente slot visual del jugador
 guidata(hObject, handles);
@@ -186,7 +191,8 @@ fprintf("Carta repartida al jugador: %s  (valor: %.1f) | P_J total: %.1f\n", ...
 % --- Executes on button press in btnSimulacion.
 function btnSimulacion_Callback(hObject, eventdata, handles)
 
-fprintf("Has presionado el botón de 'SIMULACIÓN'\n");
+fprintf("Has presionado el boton de 'SIMULACION'\n");
+simulacion;
 
 
 % --- Executes on button press in btnSalir.
@@ -205,25 +211,26 @@ pos_ver_c = handles.pos_ver_c;
 % Solo se puede pedir si no se ha pasado y quedan slots visuales
 if (P_J <= 7.5 && pos_ver_c <= 12)
 
-    % --- Tomar siguiente carta del mazo ---
+    %  Tomar siguiente carta del mazo 
     carta_fig = handles.Baraja_fig{handles.pos_carta_1};
     carta_val = handles.Baraja_val(handles.pos_carta_1);
 
-    % --- Actualizar puntuación del jugador ---
+    %  Actualizar puntuación del jugador 
     P_J = P_J + carta_val;
     handles.P_J = P_J;
+    handles.cartas_J_val = [handles.cartas_J_val, carta_val];
     guidata(hObject, handles);
 
-    % --- Mostrar la carta en el slot visual correspondiente ---
+    %  Mostrar la carta en el slot visual correspondiente 
     mostrar_figuras(carta_fig, pos_ver_c, 'jugador', handles);
     fprintf("Carta pedida: %s  (valor: %.1f) | P_J total: %.1f\n", carta_fig, carta_val, P_J);
 
-    % --- Avanzar contadores ---
+    %  Avanzar contadores 
     handles.pos_carta_1 = handles.pos_carta_1 + 1;
     handles.pos_ver_c   = pos_ver_c + 1;
     guidata(hObject, handles);
 
-    % --- Verificar si el jugador se pasó DESPUÉS de sumar ---
+    %  Verificar si el jugador se pasó DESPUÉS de sumar 
     if P_J > 7.5
         fprintf("¡El jugador se ha pasado! P_J = %.1f\n", P_J);
         set(handles.PanelResultados, 'Visible', 'on');
@@ -248,7 +255,7 @@ fprintf("El jugador se planta con P_J = %.2f\n", P_J);
 set(handles.PanelResultados, 'Visible', 'on');
 set(handles.editResultados, 'String', sprintf('Te plantaste con %.1f. Turno de la casa...', P_J));
 
-% --- TURNO DE LA CASA: repartir primera carta ---
+% TURNO DE LA CASA 
 carta_fig_c = handles.Baraja_fig{handles.pos_carta_1};
 carta_val_c = handles.Baraja_val(handles.pos_carta_1);
 
@@ -266,7 +273,7 @@ if handles.P_C > 7.5
     return;
 end
 
-% --- BUCLE COMPLETO DE LA CASA (decisión probabilística) ---
+% BUCLE COMPLETO DE LA CASA   
 handles = juega_casa(hObject, handles);
 function editResultados_Callback(hObject, eventdata, handles)
 

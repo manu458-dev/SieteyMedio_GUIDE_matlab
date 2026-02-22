@@ -6,6 +6,7 @@ handles.P_J         = 0.0;  % puntuación del jugador
 handles.P_C         = 0.0;  % puntuación de la casa
 handles.pos_carta_1 = 1;    % puntero al mazo (primera carta)
 handles.pos_ver_c   = 1;    % slot visual del jugador (empieza en 1)
+handles.cartas_J_val = [];   % valores individuales de las cartas del jugador
 handles.i           = 1;
 
 %% SE OCULTAN LOS CONTENEDORES DE LAS CARTAS DEL JUGADOR
