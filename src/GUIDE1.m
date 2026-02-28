@@ -22,9 +22,10 @@ function varargout = GUIDE1(varargin)
 
 % Edit the above text to modify the response to help GUIDE1
 
-% Last Modified by GUIDE v2.5 18-Feb-2026 14:45:20
+% Last Modified by GUIDE v2.5 21-Feb-2026 12:53:53
 
 % Begin initialization code - DO NOT EDIT
+
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
@@ -58,10 +59,31 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
+%CONFIGURACIÓN DE VARIALES GLOBALES PERSONALIZADAS
+handles.P_J = 0.0; % PUNTUACIÓN TOTAL DEL JUGADOR
+guidata(hObject, handles);
+
+handles.P_C = 0.0; % PUNTUACIÓN TOTAL DE LA CASA
+guidata(hObject, handles);
+
+handles.pos_carta_1 = 1; % USAR con VARIABLES Baraja_figura y Bajara_valor
+guidata(hObject, handles);
+
+handles.cartas_J_val = []; % valores individuales de las cartas del jugador
+guidata(hObject, handles);
+
+handles.total_cartas = 40; % auxiliar para el calculo de probabilidades
+guidata(hObject, handles);
+
+handles.pos_ver_c = 1; % contador para desplegar los paneles del jugador y carta
+guidata(hObject, handles);
+
+handles.i = 1;
+guidata(hObject, handles);
 % UIWAIT makes GUIDE1 wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 handles.axesJ13.Toolbar.Visible = 'off';
-
+al_abrir_ventana(handles);
 
 % --- Outputs from this function are returned to the command line.
 function varargout = GUIDE1_OutputFcn(hObject, eventdata, handles) 
@@ -122,59 +144,187 @@ function setBackgroundWindow(hObject)
 
 % --- Executes on button press in btnNuevoJuego.
 function btnNuevoJuego_Callback(hObject, eventdata, handles)
-% hObject    handle to btnNuevoJuego (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 fprintf("Has presionado el botón de 'JUEVO NUEVO'\n");
+
+% correccion JJ de bug (boton plantarse)
+set(handles.btnPedir, 'Enable', 'on');
+set(handles.btnPlantarse, 'Enable', 'on');
+
+% SE LIMPIAN LOS CONTENEDORES Y SE RESETEAN LAS VARIABLES
+handles = reiniciar_juego(handles);
+guidata(hObject, handles);
+
+%SE HACE EL PROCESO DE CARGA DE BARAJA
+crear_variables_baraja();
+cargar_variables_baraja();
+
+% SE BARAJEA (handles se actualiza con Baraja_fig y Baraja_val barajeadas)
+handles = barajear(hObject, handles);
+
+% SE REPARTE 1 CARTA AL JUGADOR
+% Tomar la primera carta de la baraja barajeada
+carta_fig = handles.Baraja_fig{handles.pos_carta_1};  % ruta relativa de la imagen
+carta_val = handles.Baraja_val(handles.pos_carta_1);  % valor numérico de la carta
+
+% Actualizar puntuación del jugador
+handles.P_J = handles.P_J + carta_val;
+handles.cartas_J_val = [handles.cartas_J_val, carta_val];
+guidata(hObject, handles);
+
+% INICIO DE CORRECCIÓN (JJ): Mostrar la puntuacion inicial
+% ==========================================================
+% 1. Hacemos visible el panel
+set(handles.PanelResultados, 'Visible', 'on');
+
+% 2. Escribimos la puntuación inicial en el recuadro rojo
+set(handles.editResultados, 'String', sprintf('%.1f', handles.P_J));
+% ==========================================================
+% FIN DE CORRECCIÓN
+
+% Mostrar la carta en la posición visual 1 del jugador
+mostrar_figuras(carta_fig, handles.pos_ver_c, 'jugador', handles);
+
+%  Avanzar contadores 
+handles.pos_carta_1 = handles.pos_carta_1 + 1;  % siguiente carta del mazo
+handles.pos_ver_c   = handles.pos_ver_c   + 1;  % siguiente slot visual del jugador
+
+%(JJ) Es CRUCIAL guardar los cambios en handles después de actualizar P_J y editResultados
+guidata(hObject, handles);
+
+fprintf("Carta repartida al jugador: %s  (valor: %.1f) | P_J total: %.1f\n", ...
+        carta_fig, carta_val, handles.P_J);
+
+% SE COMIENZA CON EL CLICLO REPARTIR - PEDIR/PLANTARSE
+
+% SE PASA EL TURNO A LA MAQUINA
+    % Aqui se implementa lo que se hizo en la práctica anterior
+
+% SE EVAUAL LOS RESULTADOS (ver ganador)
+
+
 
 
 % --- Executes on button press in btnSimulacion.
 function btnSimulacion_Callback(hObject, eventdata, handles)
-% hObject    handle to btnSimulacion (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-fprintf("Has presionado el botón de 'SIMULACIÓN'\n");
+
+fprintf("Has presionado el boton de 'SIMULACION'\n");
+simulacion;
 
 
 % --- Executes on button press in btnSalir.
 function btnSalir_Callback(hObject, eventdata, handles)
-% hObject    handle to btnSalir (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 fprintf("Has presionado el botón de 'SALIR'\n");
+figure1_CloseRequestFcn(handles.figure1, eventdata, handles)
 
 
 % --- Executes on button press in btnPedir.
 function btnPedir_Callback(hObject, eventdata, handles)
-% hObject    handle to btnPedir (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 fprintf("Has presionado el botón de 'PEDIR MÁS CARTAS'\n");
+
+P_J       = handles.P_J;
+pos_ver_c = handles.pos_ver_c;
+
+% Solo se puede pedir si no se ha pasado y quedan slots visuales
+if (P_J <= 7.5 && pos_ver_c <= 12)
+
+    %  Tomar siguiente carta del mazo 
+    carta_fig = handles.Baraja_fig{handles.pos_carta_1};
+    carta_val = handles.Baraja_val(handles.pos_carta_1);
+
+    %  Actualizar puntuación del jugador 
+    P_J = P_J + carta_val;
+    handles.P_J = P_J;
+    handles.cartas_J_val = [handles.cartas_J_val, carta_val];
+    guidata(hObject, handles);
+
+    %  Mostrar la carta en el slot visual correspondiente 
+    mostrar_figuras(carta_fig, pos_ver_c, 'jugador', handles);
+    fprintf("Carta pedida: %s  (valor: %.1f) | P_J total: %.1f\n", carta_fig, carta_val, P_J);
+
+    %
+    set(handles.PanelResultados,'Visible','on');
+        set(handles.editResultados,'String',P_J);
+
+    %  Avanzar contadores 
+    handles.pos_carta_1 = handles.pos_carta_1 + 1;
+    handles.pos_ver_c   = pos_ver_c + 1;
+    guidata(hObject, handles);
+
+    %  Verificar si el jugador se pasó DESPUÉS de sumar 
+    if P_J > 7.5
+        fprintf("¡El jugador se ha pasado! P_J = %.1f\n", P_J);
+        set(handles.PanelResultados, 'Visible', 'on');
+        set(handles.editResultados, 'String', sprintf('¡Te has pasado! (%.1f) Gana la Casa!!!', P_J));
+
+        % --- Correccion JJ de bug (boton plantarse):  ---
+        set(handles.btnPedir, 'Enable', 'off');
+        set(handles.btnPlantarse, 'Enable', 'off');
+        % ---------------------------
+    end
+
+else
+    fprintf("No se puede pedir más cartas. P_J=%.1f pos=%d\n", P_J, pos_ver_c);
+    set(handles.PanelResultados, 'Visible', 'on');
+    set(handles.editResultados, 'String', '¡No puedes pedir más cartas!');
+end
+
 
 
 % --- Executes on button press in btnPlantarse.
 function btnPlantarse_Callback(hObject, eventdata, handles)
-% hObject    handle to btnPlantarse (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 fprintf("Has presionado el botón de 'PLANTARSE'\n");
 
+% correccion JJ de bug (boton plantarse):
+% --- VALIDACIÓN DE SEGURIDAD ---
+if handles.P_J > 7.5 || handles.P_J == 0
+    return; % No hace nada si ya perdió o no tiene cartas
+end
+% Desactivar botones para que no se presione nada mientras la casa juega
+set(handles.btnPedir, 'Enable', 'off');
+set(handles.btnPlantarse, 'Enable', 'off');
+% -------------------------------
 
+% El jugador se planta: mostrar mensaje provisional
+P_J = handles.P_J;
+fprintf("El jugador se planta con P_J = %.2f\n", P_J);
+set(handles.PanelResultados, 'Visible', 'on');
+set(handles.editResultados, 'String', sprintf('Te plantaste con %.1f. Turno de la casa...', P_J));
 
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% TURNO DE LA CASA 
+carta_fig_c = handles.Baraja_fig{handles.pos_carta_1};
+carta_val_c = handles.Baraja_val(handles.pos_carta_1);
+handles.P_C         = handles.P_C + carta_val_c;
+handles.pos_carta_1 = handles.pos_carta_1 + 1;
+guidata(hObject, handles);
 
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
+% --- MUESTRA LA PRIMERA CARTA ---
+mostrar_figuras(carta_fig_c, 1, 'casa', handles);
+
+% CAMBIO JJ (juego de la casa): pausas para las cartas de la casa
+% ==========================================================
+drawnow;      % Obliga a MATLAB a dibujar la carta antes de seguir
+pause(0.8);   % Espera 0.8 segundos (puedes ajustar el tiempo)
+% ==========================================================
+% FIN DE CAMBIO
+
+fprintf("Casa recibe 1a carta: %s (valor: %.1f) | P_C = %.2f\n", carta_fig_c, carta_val_c, handles.P_C);
+
+% Verificar si la primera carta ya pasa de 7.5 (muy raro pero posible)
+if handles.P_C > 7.5
+    set(handles.editResultados, 'String', ...
+        sprintf('¡Ganaste! La casa se pasó en su primera carta (%.1f vs tu %.1f)', handles.P_C, P_J));
+    return;
+end
+
+% BUCLE COMPLETO DE LA CASA   
+handles = juega_casa(hObject, handles);
+function editResultados_Callback(hObject, eventdata, handles)
+
 
 
 % --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+function editResultados_CreateFcn(hObject, eventdata, handles)
+
 
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
@@ -185,19 +335,20 @@ end
 
 % --- Executes during object creation, after setting all properties.
 function axesJ13_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to axesJ13 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: place code in OpeningFcn to populate axesJ13
 handles.axesJ13.Toolbar.Visible = 'off';
 
 
 % --- Executes during object creation, after setting all properties.
 function axes4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to axes4 (see GCBO)
+
+
+
+% --- Executes when user attempts to close figure1.
+function figure1_CloseRequestFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+% handles    structure with handles and user data (see GUIDATA)
 
-% Hint: place code in OpeningFcn to populate axes4
-
+% Hint: delete(hObject) closes the figure
+delete(hObject);
+fprintf("Se ha cerrado la ventana con éxito\n");
